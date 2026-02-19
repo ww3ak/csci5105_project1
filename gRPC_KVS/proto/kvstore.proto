@@ -31,30 +31,30 @@ message  GetTextRequest {
 }
 
 message  GetTextResponse {
-  bool found = 1; //if key exists
-  string textbook_chunk = 2; //stored text if found
+  bool found = 1; // If requested key stored by key-value server
+  string textbook_chunk = 2; // Stored text if found
 }
 
 message  DeleteRequest {
-  string key = 1; //key to delete
+  string key = 1; // Key to delete
 }
 
 message  DeleteResponse {
-  bool deleted = 1; //true if entry was removed
+  bool deleted = 1; // True if entry was removed
 }
 
 message  ListRequest {}
 
 
 message  ListResponse {
-  repeated string keys = 1; //all stored keys (array of strings)
+  repeated string keys = 1; // All stored keys (list of strings)
 }
 
 message  HealthRequest {}
 
 
 message  HealthResponse {
-  string server_name = 1; //Human-readable server name
-  string server_version = 2; //Version identifier
-  uint64 key_count = 3; //Number of stored keys
+  string server_name = 1; // Human-readable server name
+  string server_version = 2; // Version identifier
+  uint64 key_count = 3; // Number of stored keys
 }

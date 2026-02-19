@@ -58,23 +58,22 @@ def build_index():
 
 
 def get_text_from_keys(keys : list[str]) -> list[str]:
+    '''Retrieves textbook chunks from key-value store given a list of keys'''
     text_out = []
-
-    #open channel
+    # Connect to the gRPC Server
     with grpc.insecure_channel(KV_ADDR) as ch:
-        #create stub
+        # Create stub on the connected channel
         stub = kvstore_pb2_grpc.KeyValueStoreStub(ch)
-        #for each key in key list
+        # For each key in key list
         for key in keys:
-            #call stub
+            # Use stub to access RPC
             response = stub.GetText(kvstore_pb2.GetTextRequest(key=key))
-            #read response if found
-            if (response.found):
+            # If requested key stored by key-value server
+            if (response.found): 
                 text_out.append(response.textbook_chunk)
             else:
-                # append a placeholder so the list stays aligned
+                # Append a placeholder so the list stays aligned
                 text_out.append("")
-    #return list of strings 
     return text_out
 
 @mcp.tool()

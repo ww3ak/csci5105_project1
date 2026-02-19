@@ -53,7 +53,9 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
                 print(f"[{len(self.textbook_chunks)}] key/values loaded")
 
 
+
     def Put(self, request, context):
+        '''Stores or overwrites the textbook chunk and embedding associated with a key'''
         # Set overwritten based on if the key exists in the dictionaries
         overwritten = (request.key in self.textbook_chunks) or (request.key in self.embeddings)
 
@@ -66,11 +68,13 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
 
 
     def StreamEmbeddings(self, request, context):
+        '''Stream all stored embedding vectors and their associated keys'''
         for key, emb in self.embeddings.items():
             yield kvstore_pb2.EmbeddingEntry(key=key, embedding=emb)
 
 
     def GetText(self, request):
+        '''Retrieves the textbook chunk associated with a key, if it exists'''
         found = (request.key in self.textbook_chunks)
         textbook_chunk = ""
         # Populate textbook chunk if it resides in hash table
@@ -80,6 +84,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
     
 
     def Delete(self, request):
+        '''Removes all stored data associated with a key'''
         deleted = 0
         # If key found in hash tables, delete the entries
         if (request.key in self.textbook_chunks) or (request.key in self.embeddings):
@@ -90,6 +95,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
     
 
     def List(self, request):
+        '''Returns a list of all keys currently stored in the key-value store'''
         keys = []
         for key in self.embeddings.keys():
             keys.append(key)
@@ -97,6 +103,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
 
 
     def Health(self, request):
+        '''Report basic server metadata and current store size'''
         server_name = SERVER_NAME
         server_version = SERVER_VERSION
         key_count = len(self.embeddings)
