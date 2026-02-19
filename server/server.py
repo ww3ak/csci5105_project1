@@ -9,6 +9,8 @@ import sys
 import kvstore_pb2
 import kvstore_pb2_grpc
 
+SERVER_NAME = "CSCI 5105 Project 1 Key Value Server"
+SERVER_VERSION = "2.0.0"
 
 # Derived from the environment variables (see devcontainer.json)
 GRPC_SERVER_PORT = int(os.getenv("KVSTORE_PORT", "50051"))
@@ -68,8 +70,6 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
             yield kvstore_pb2.EmbeddingEntry(key=key, embedding=emb)
 
 
-    # TODO: ask about this 'context' parameter the other RPCs have
-    # Do we need to use it in the following RPCs?
     def GetText(self, request):
         found = (request.key in self.textbook_chunks)
         textbook_chunk = ""
@@ -95,11 +95,12 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
             keys.append(key)
         return kvstore_pb2.ListResponse(keys=keys)
 
-    # TODO: finish this RPC
-    # I'm not sure where to find 'server_name' or 'server_version'
-    def Health(self, request):
-        return 0
 
+    def Health(self, request):
+        server_name = SERVER_NAME
+        server_version = SERVER_VERSION
+        key_count = len(self.embeddings)
+        return kvstore_pb2.HealthResponse(server_name=server_name, server_version=server_version, key_count=key_count)
 
 
 def serve():
