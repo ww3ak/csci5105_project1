@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 
 class gRPCTestSetup(unittest.TestCase):
-    def setup(self):
+    def setUp(self):
         self.service = InMemoryKV()
         # Clear dictionaries to undo load from disk--start fresh
         self.service.textbook_chunks = {}
