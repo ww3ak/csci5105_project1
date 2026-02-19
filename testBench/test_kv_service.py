@@ -20,7 +20,7 @@ class TestPut(gRPCTestSetup):
         response = self.service.Put(request, 0)    # Context parameter not used, set to 0
         self.assertFalse(response.overwritten)
         self.assertEqual(self.service.textbook_chunks["test_key"], "original_value")
-        self.assertEqual(self.service.embedding["test_key"], bytes([1, 1, 1, 1]))
+        self.assertEqual(self.service.embeddings["test_key"], bytes([1, 1, 1, 1]))
 
         # Overwrite textbook chunk and embedding for test_key
         request = kvstore_pb2.PutRequest(key="test_key", 
@@ -30,7 +30,7 @@ class TestPut(gRPCTestSetup):
 
         self.assertTrue(response.overwritten)
         self.assertEqual(self.service.textbook_chunks["test_key"], "new_value")
-        self.assertEqual(self.service.embedding["test_key"], bytes([2, 2, 2, 2]))
+        self.assertEqual(self.service.embeddings["test_key"], bytes([2, 2, 2, 2]))
 
 
 class TestGetText(gRPCTestSetup):
@@ -41,7 +41,7 @@ class TestGetText(gRPCTestSetup):
         #fake request key
         request = SimpleNamespace(key="test_key")
         #get GetText response 
-        response = self.service.GetText(request)
+        response = self.service.GetText(request, None)
         # response should be true and return test_value
         self.assertTrue(response.found)
         self.assertEqual(response.textbook_chunk, "test_value")
@@ -51,7 +51,7 @@ class TestGetText(gRPCTestSetup):
         request = SimpleNamespace(key="missing_key")
 
         #get GetText response 
-        response = self.service.GetText(request)
+        response = self.service.GetText(request, None)
 
         # respose should be false and return empty string
         self.assertFalse(response.found)
@@ -71,7 +71,7 @@ class TestList(gRPCTestSetup):
             list_request = kvstore_pb2.ListRequest()
             
             # Test List() on an empty key-value store
-            response = self.service.List(list_request)
+            response = self.service.List(list_request, None)
             self.assertEqual(len(response.keys), 0)
 
             # Test List() after adding 3 entries
@@ -87,21 +87,52 @@ class TestList(gRPCTestSetup):
             self.service.Put(put_request1, 0)
             self.service.Put(put_request2, 0)
             self.service.Put(put_request3, 0)
-            response = self.service.List(list_request)
+            response = self.service.List(list_request, None)
             self.assertEqual(len(response.keys), 3)
             self.assertEqual(set(response.keys), set(["key1", "key2", "key3"]))
 
             # Test List() after removing one of the entries
             del_request = kvstore_pb2.DeleteRequest(key="key2")
-            response = self.service.Delete(del_request)
+            response = self.service.Delete(del_request, None)
             self.assertTrue(response.deleted)
-            response = self.service.List(list_request)
+            response = self.service.List(list_request, None)
             self.assertEqual(len(response.keys), 2)
             self.assertEqual(set(response.keys), set(["key1", "key3"]))
 
 
 class TestHealth(gRPCTestSetup):
-    pass
+    def test_health(self):
+        # Empty store
+        request = kvstore_pb2.HealthRequest()
+        response = self.service.Health(request, None)
+
+        self.assertEqual(response.server_name, "CSCI 5105 Project 1 Key Value Server")
+        self.assertEqual(response.server_version, "2.0.0")
+        self.assertEqual(response.key_count, 0)
+
+        # Add two entries
+        put_request1 = kvstore_pb2.PutRequest(
+            key="key1",
+            textbook_chunk="val1",
+            embedding=bytes([1, 1, 1, 1])
+        )
+
+        put_request2 = kvstore_pb2.PutRequest(
+            key="key2",
+            textbook_chunk="val2",
+            embedding=bytes([2, 2, 2, 2])
+        )
+
+        self.service.Put(put_request1, None)
+        self.service.Put(put_request2, None)
+
+        # Health after inserts
+        response = self.service.Health(request, None)
+
+        self.assertEqual(response.server_name, "CSCI 5105 Project 1 Key Value Server")
+        self.assertEqual(response.server_version, "2.0.0")
+        self.assertEqual(response.key_count, 2)
+
 
 
 if __name__ == "__main__":

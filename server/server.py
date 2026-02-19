@@ -73,7 +73,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
             yield kvstore_pb2.EmbeddingEntry(key=key, embedding=emb)
 
 
-    def GetText(self, request):
+    def GetText(self, request,context):
         '''Retrieves the textbook chunk associated with a key, if it exists'''
         found = (request.key in self.textbook_chunks)
         textbook_chunk = ""
@@ -83,7 +83,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
         return kvstore_pb2.GetTextResponse(found=found, textbook_chunk=textbook_chunk)
     
 
-    def Delete(self, request):
+    def Delete(self, request,context):
         '''Removes all stored data associated with a key'''
         deleted = 0
         # If key found in hash tables, delete the entries
@@ -94,7 +94,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
         return kvstore_pb2.DeleteResponse(deleted=deleted)
     
 
-    def List(self, request):
+    def List(self, request,context):
         '''Returns a list of all keys currently stored in the key-value store'''
         keys = []
         for key in self.embeddings.keys():
@@ -102,7 +102,7 @@ class InMemoryKV(kvstore_pb2_grpc.KeyValueStoreServicer):
         return kvstore_pb2.ListResponse(keys=keys)
 
 
-    def Health(self, request):
+    def Health(self, request,context):
         '''Report basic server metadata and current store size'''
         server_name = SERVER_NAME
         server_version = SERVER_VERSION
