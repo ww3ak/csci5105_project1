@@ -60,11 +60,28 @@ class TestGetText(gRPCTestSetup):
 
 class TestDelete(gRPCTestSetup):
     def test_delete_existing_key(self):
-        pass
+        # Pre-populate the store
+        self.service.textbook_chunks["test_key"] = "test_value"
+        self.service.embeddings["test_key"] = bytes([1, 2, 3])
+
+        request = kvstore_pb2.DeleteRequest(key="test_key")
+
+        response = self.service.Delete(request, None)
+
+        # Should report that a key was deleted
+        self.assertTrue(response.deleted)
+
+        # Key should be removed from both dictionaries
+        self.assertNotIn("test_key", self.service.textbook_chunks)
+        self.assertNotIn("test_key", self.service.embeddings)
 
     def test_delete_missing_key(self):
-        pass
+        request = kvstore_pb2.DeleteRequest(key="missing_key")
 
+        response = self.service.Delete(request, None)
+
+        # Nothing should be deleted
+        self.assertFalse(response.deleted)
 
 class TestList(gRPCTestSetup):
     def test_list(self):
