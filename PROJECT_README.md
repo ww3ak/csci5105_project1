@@ -6,7 +6,26 @@
 ## Authors
 
 - Sabrina Simkhovich (simkh005@umn.edu)
-- 
+- Brock Schmertman (schme168@umn.edu)
+
+## Project Description
+
+In this project, we implement a gRPC-based key-value store to act as a back end storage 
+system for a context-serving LLM architecture. Today, LLMs are increasingly becomming
+reliable on external databases to provide context during inference. This project implements
+a simple version of such a system. Firstly, an ingestor acts as a key-value store client which
+executes RPCs to populate the store with a textbook chunk and corresponding vector embedding,
+both of which are accessibly by a key. During LLM (GitHub Copilot) inference, a Model Context 
+Protocol (MCP) server exposes a tool to the LLM to interface with the store. In other words, 
+the MCP server also acts as a key-value store client that uses selected keys to retrieve 
+desired textbook chunks/embeddings and relay them to the LLM. 
+
+Once provided with the project skeleton, we began by populating a .proto file with message
+types and RPC declarations, which provides clients with an interface to interact with the 
+key-value store. Next, we wrote the RPC definitions in the key-value store itself (server.py). 
+Lastly, we implemented an MCP server function called get_text_from_keys(), which connects to the 
+key-value store and makes several RPCs to retrieve the desired textbook chunks and embeddings
+needed during inference. 
 
 
 ## Project Structure
